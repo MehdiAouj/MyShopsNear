@@ -12,11 +12,19 @@ namespace MyShopsNear.Services
             var database = mongoClient.GetDatabase(settings.DatabaseName);
             _users = database.GetCollection<Users>(settings.UsersCollectionName);
         }
+        //Not Done yet ???
         public Users Create(Users user)
         {
-            _users.InsertOne(user);
+            var eml = user.Email;
 
+            if (eml != null)
+            {
+                throw new ArgumentException("Erooooooor");
+            }
+            _users.InsertOne(user);
             return user;
+            
+            
         }
 
         public List<Users> Get()
@@ -29,17 +37,11 @@ namespace MyShopsNear.Services
             return _users.Find(user => user.Username == username).FirstOrDefault();
         }
 
-        public Users Get(UserLogin userLogin)
-        {
-            Users user = _users.Find(o => o.Username.Equals(userLogin.UserName,
-            StringComparison.OrdinalIgnoreCase) && o.Password.Equals(userLogin.Password)).FirstOrDefault();
+        
 
-            return user;
-        }
-
-        public void Remove(string id)
+        public void Remove(string username)
         {
-            _users.DeleteOne(user => user.Id == id);
+            _users.DeleteOne(user => user.Username == username);
         }
 
         public void Update(string id, Users user)

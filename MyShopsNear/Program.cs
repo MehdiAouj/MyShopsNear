@@ -11,58 +11,6 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 
 
-
-//Jwt Auth
-
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
-{
-    options.TokenValidationParameters = new TokenValidationParameters()
-    {
-        ValidateIssuerSigningKey = true,
-        ValidIssuer = builder.Configuration["Jwt:Issuer"],
-        ValidAudience = builder.Configuration["Jwt:Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
-    };
-});
-
-builder.Services.AddAuthorization();
-
-//Login 
-
-IResult Login(UserLogin user, IUserServices service)
-{
-    if (!string.IsNullOrEmpty(user.UserName) &&
-        !string.IsNullOrEmpty(user.Password))
-    {
-        var loggedInUser = service.Get(user);
-        if (loggedInUser is null) return Results.NotFound("User not found");
-
-        var claims = new[]
-        {
-            new Claim(ClaimTypes.NameIdentifier, loggedInUser.Username),
-            new Claim(ClaimTypes.Email, loggedInUser.Email)
-        };
-
-        var token = new JwtSecurityToken
-        (
-            issuer: builder.Configuration["Jwt:Issuer"],
-            audience: builder.Configuration["Jwt:Audience"],
-            claims: claims,
-            expires: DateTime.UtcNow.AddDays(60),
-            notBefore: DateTime.UtcNow,
-            signingCredentials: new SigningCredentials(
-                new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])),
-                SecurityAlgorithms.HmacSha256)
-        );
-
-        var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
-
-        return Results.Ok(tokenString);
-    }
-    return Results.BadRequest("Invalid user credentials");
-}
-
-
 // Add services to the container.
 
 builder.Services.Configure<ShopsNearDatabaseSettings>(
@@ -82,9 +30,6 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
-
-app.MapPost("/login",
-(UserLogin user, IUserServices service) => Login(user, service));
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
