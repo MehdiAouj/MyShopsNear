@@ -7,24 +7,30 @@ namespace MyShopsNear.Services
     {
         private readonly IMongoCollection<Users> _users;
 
+        public static Users usr = new Users();
+
         public UsersServices(IShopsNearDatabaseSettings settings, IMongoClient mongoClient)
         {
             var database = mongoClient.GetDatabase(settings.DatabaseName);
             _users = database.GetCollection<Users>(settings.UsersCollectionName);
         }
-        //Not Done yet ???
+        //Done
         public Users Create(Users user)
         {
-            var eml = user.Email;
+            var eml = _users.Find(em => em.Email == user.Email).FirstOrDefault();
 
-            if (eml != null)
+            if (eml == null)
             {
-                throw new ArgumentException("Erooooooor");
+                _users.InsertOne(user);
+                return user;
             }
-            _users.InsertOne(user);
-            return user;
+            else
+            {
+                throw new Exception("Email Already Exists! Try another One :)");
+            }
+                
             
-            
+
         }
 
         public List<Users> Get()

@@ -64,10 +64,6 @@ namespace MyShopsNear.Controllers
         {
             try
             {
-                /*if (usr.Email == user.Email)
-                {
-                    return BadRequest("Email Already Exists");
-                }*/
                 userServices.Create(user);
 
                 return CreatedAtAction(nameof(Get), new { username = user.Username }, user);
