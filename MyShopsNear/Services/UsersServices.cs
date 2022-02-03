@@ -9,10 +9,13 @@ namespace MyShopsNear.Services
 
         public static Users usr = new Users();
 
+        private readonly IMongoCollection<Shops> _shops;
+
         public UsersServices(IShopsNearDatabaseSettings settings, IMongoClient mongoClient)
         {
             var database = mongoClient.GetDatabase(settings.DatabaseName);
             _users = database.GetCollection<Users>(settings.UsersCollectionName);
+            _shops = database.GetCollection<Shops>(settings.UsersCollectionName);
         }
         //Done
         public Users Create(Users user)
@@ -28,9 +31,6 @@ namespace MyShopsNear.Services
             {
                 throw new Exception("Email Already Exists! Try another One :)");
             }
-                
-            
-
         }
 
         public List<Users> Get()

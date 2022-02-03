@@ -4,6 +4,7 @@ using MyShopsNear.Models;
 using MyShopsNear.Services;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 
 
@@ -34,6 +35,7 @@ namespace MyShopsNear.Controllers
         {
             return userServices.Get();
         }
+
 
         // GET api/<UsersController>/5
         [HttpGet("{username}")]
@@ -137,7 +139,12 @@ namespace MyShopsNear.Controllers
 
                 if (user == null || user.Email != userLogin.Email)
                 {
-                    return NotFound($"User with the Username {Email} is not found");
+                    return NotFound($"User with the Username {Email} is not found!");
+                }
+
+                if(userLogin.Password == null || userLogin.Password != user.Password)
+                {
+                    return NotFound($"The password is wrong, please check again!");
                 }
 
                 string token = CreateToken(user);
@@ -153,6 +160,7 @@ namespace MyShopsNear.Controllers
         }
         
         //token creation
+        
         private string CreateToken(Users user)
         {
             List<Claim> claims = new List<Claim>
@@ -175,5 +183,29 @@ namespace MyShopsNear.Controllers
 
             return jwt;
         }
+
+        //password hash
+        /*
+        private void CreatePassHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
+        {
+            using (var hmac = new HMACSHA512())
+            {
+                passwordSalt = hmac.Key;
+                passwordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
+
+            }
+        }
+
+        //password hash verif
+
+        private bool VerifyPassHash(string password, byte[] passwordHash, byte[] passwordSalt)
+        {
+            using (var hmac = new HMACSHA512(passwordSalt))
+            {
+                var computedHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
+
+                return computedHash.SequenceEqual(passwordHash);
+            }
+        }*/
     }
 }
